@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+python-dotenv
+python-decouple
+pydantic
+httpx
+google-genai
+python-json-logger
+requests

@@ -1,0 +1,14 @@
+*.pyc
+__pycache__
+venv
+.env
+.venv
+build.sh
+cache
+runLocal.bat
+runLocal.sh
+
+# Google Cloud credentials
+gcp-credentials.json
+*-credentials.json
+service-account.json
