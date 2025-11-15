@@ -4,6 +4,7 @@ from src.entities.chatbot_entities import WahaRequest
 from src.mapper.waha_mapper import map_to_chatbot_payload, map_to_send_text_payload
 import os
 from src.services.speech2text import convert_speech_to_text
+from src.services.image2text import convert_image_to_text
 import src.utils.environment as env
 import json
 from src.utils.logger import logger
@@ -51,6 +52,8 @@ async def chatbot_endpoint(request: WahaRequest):
 
         if request.payload.hasMedia:
             logger.info(f"Received media: {request.payload.media.mimetype if request.payload.media else 'No media object'}")
+            
+            # Manejo de audio
             if request.payload.media.mimetype == "audio/ogg; codecs=opus":
                 logger.info(f"Received audio: {request.payload.media.url}")
                 try:
@@ -69,6 +72,27 @@ async def chatbot_endpoint(request: WahaRequest):
                     return {
                         "status": "error",
                         "message": f"Error al transcribir el audio: {str(e)}"
+                    }
+            
+            # Manejo de imágenes y PDFs
+            elif request.payload.media.mimetype.startswith('image/') or request.payload.media.mimetype == 'application/pdf':
+                logger.info(f"Received image/PDF: {request.payload.media.url} - MIME: {request.payload.media.mimetype}")
+                try:
+                    extracted_text = await convert_image_to_text(request.payload.media.url)
+                    logger.info(f"Análisis de imagen/PDF en Router: {extracted_text}")
+                    if extracted_text is None:
+                        logger.error(f"No se pudo analizar la imagen/PDF - convert_image_to_text retornó None")
+                        return {
+                            "status": "error",
+                            "message": "No se pudo analizar la imagen o PDF"
+                        }
+                    else:
+                        request.payload.body = extracted_text
+                except Exception as e:
+                    logger.error(f"Excepción al analizar imagen/PDF: {str(e)} - Tipo: {type(e).__name__}", exc_info=True)
+                    return {
+                        "status": "error",
+                        "message": f"Error al analizar la imagen o PDF: {str(e)}"
                     }
 
         """

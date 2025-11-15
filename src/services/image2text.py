@@ -163,7 +163,7 @@ async def convert_image_to_text(url_media: str, model_name: str = None) -> str:
         )
         
         image_text = result.text
-        logger.info(f"Análisis de archivo exitoso: {image_text[:100]}...")
+        logger.info(f"Análisis de archivo exitoso: {image_text}")
         logger.debug(f"Tokens utilizados - Total: {result.usage_metadata.total_token_count}, "
                     f"Prompt: {result.usage_metadata.prompt_token_count}, "
                     f"Respuesta: {result.usage_metadata.candidates_token_count}")
