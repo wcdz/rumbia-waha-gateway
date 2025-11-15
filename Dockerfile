@@ -11,10 +11,11 @@ COPY . .
 RUN pip install -U pip
 RUN pip install -U setuptools
 
-# Instala las dependencias desde requirements.txt, asegurándote de que psycopg2 sea reemplazado por psycopg2-binary
+# Instala las dependencias desde requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-EXPOSE 8090
+# Cloud Run proporciona el puerto dinámicamente a través de $PORT
+EXPOSE 8080
 
-# CMD que ejecuta el script principal
-CMD ["python","-m", "src.main"]
+# CMD que ejecuta uvicorn directamente, escuchando en el puerto proporcionado por Cloud Run
+CMD exec uvicorn src.main:app --host 0.0.0.0 --port ${PORT:-8080}

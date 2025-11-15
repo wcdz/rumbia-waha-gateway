@@ -2,6 +2,7 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import logging
+import os
 from dotenv import load_dotenv
 load_dotenv()
 from src.routes.waha_router import router as waha_router
@@ -27,5 +28,17 @@ app.add_middleware(
 
 app.include_router(waha_router)
 
+@app.get("/health")
+async def health_check():
+    """Health check endpoint para Cloud Run"""
+    return {"status": "healthy", "service": "WAHA Gateway"}
+
+@app.get("/")
+async def root():
+    """Root endpoint"""
+    return {"message": "WAHA Gateway API", "docs": "/docs"}
+
 if __name__ == "__main__":
-    uvicorn.run("src.main:app", host="0.0.0.0", port=8090, reload=True)
+    # Cloud Run proporciona el puerto a través de la variable de entorno PORT
+    port = int(os.environ.get("PORT", 8090))
+    uvicorn.run("src.main:app", host="0.0.0.0", port=port, reload=False)

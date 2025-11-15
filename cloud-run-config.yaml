@@ -1,0 +1,47 @@
+# Configuración para Google Cloud Run
+# Puedes usar este archivo con: gcloud run services replace cloud-run-config.yaml
+
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: waha-gateway
+  labels:
+    cloud.googleapis.com/location: us-central1
+spec:
+  template:
+    metadata:
+      annotations:
+        # Escala automática
+        autoscaling.knative.dev/minScale: '0'
+        autoscaling.knative.dev/maxScale: '10'
+        # Timeout para las solicitudes
+        run.googleapis.com/startup-cpu-boost: 'true'
+    spec:
+      containerConcurrency: 80
+      timeoutSeconds: 300
+      serviceAccountName: default
+      containers:
+      - image: gcr.io/is-geniaton-ifs-2025-g3/waha-gateway:latest
+        ports:
+        - name: http1
+          containerPort: 8080
+        env:
+        - name: GCP_PROJECT_ID
+          value: "is-geniaton-ifs-2025-g3"
+        - name: GCP_LOCATION
+          value: "us-central1"
+        - name: VERTEX_AI_MODEL
+          value: "gemini-2.0-flash-exp"
+        # Agrega aquí tus otras variables de entorno:
+        # - name: CHATBOT_API_URL
+        #   value: "https://tu-chatbot-url.com"
+        # - name: WAHA_API_URL
+        #   value: "https://tu-waha-url.com"
+        resources:
+          limits:
+            memory: 512Mi
+            cpu: '1'
+  traffic:
+  - percent: 100
+    latestRevision: true
+

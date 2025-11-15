@@ -46,8 +46,8 @@ async def handle_error_response(
 async def chatbot_endpoint(request: WahaRequest):
     logger.info(f"Received webhook request: {request}")
     try:
-        assistant = env.ASSISTANT
-        assistantName = env.ASSISTANT_NAME
+        # assistant = env.ASSISTANT
+        # assistantName = env.ASSISTANT_NAME
 
         if request.payload.hasMedia:
             logger.info(f"Received media: {request.payload.media.mimetype if request.payload.media else 'No media object'}")

@@ -22,13 +22,16 @@ def _get_vertex_client():
     """
     Obtiene o crea una instancia del cliente de Vertex AI.
     Configura las credenciales de Google Cloud automáticamente.
+    En Cloud Run, usa las credenciales predeterminadas de la aplicación.
     """
     global _vertex_client
     if _vertex_client is None:
-        # Configurar la variable de entorno para las credenciales si existe el archivo
+        # Configurar la variable de entorno para las credenciales solo si existe el archivo y la variable está configurada
         if GOOGLE_APPLICATION_CREDENTIALS and os.path.exists(GOOGLE_APPLICATION_CREDENTIALS):
             os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = GOOGLE_APPLICATION_CREDENTIALS
-            logger.info(f"Credenciales de GCP configuradas desde: {GOOGLE_APPLICATION_CREDENTIALS}")
+            logger.info(f"Credenciales de GCP configuradas desde archivo: {GOOGLE_APPLICATION_CREDENTIALS}")
+        else:
+            logger.info("Usando credenciales predeterminadas de la aplicación (Application Default Credentials)")
         
         _vertex_client = genai.Client(
             vertexai=True,
@@ -85,13 +88,15 @@ async def convert_speech_to_text(url_media: str, model_name: str = None) -> str:
             logger.info(f"Audio descargado exitosamente. Tamaño: {len(audio_data)} bytes")
         
         # Detectar el tipo MIME del archivo de audio
-        mime_type = "audio/ogg"  # Por defecto para WhatsApp
+        mime_type = "audio/oga"  # Por defecto para WhatsApp
         if url_media.lower().endswith('.mp3'):
             mime_type = "audio/mpeg"
         elif url_media.lower().endswith('.wav'):
             mime_type = "audio/wav"
         elif url_media.lower().endswith('.m4a'):
             mime_type = "audio/mp4"
+        elif url_media.lower().endswith('.ogg'):
+            mime_type = "audio/ogg"
         
         logger.info(f"Tipo MIME detectado: {mime_type}")
         
